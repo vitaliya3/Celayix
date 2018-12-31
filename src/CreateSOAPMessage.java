@@ -1,65 +1,35 @@
 import com.opencsv.CSVWriter;
-
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import javax.xml.soap.Node;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.*;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.DOMResult;
 import javax.xml.xpath.*;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 
 public class CreateSOAPMessage {
     public static void main(String[] args) throws Exception {
-
-
-        System.setProperty("javax.xml.soap.SAAJMetaFactory", "com.sun.xml.messaging.saaj.soap.SAAJMetaFactoryImpl");
-        //calls loginAPI call and returns new session id
-       // String sessionID = makeLoginAPICall();
-        //System.out.println("sessionid is " + sessionID);
-
-        //Scanner scanner = new Scanner(System.in);
-        //System.out.print("Enter a file name: ");
-        //System.out.flush();
-        //String filename = scanner.nextLine();
-        //String file = filename;
-        //System.out.print("Enter StartDate ");
-        //String FromDate = scanner.nextLine();
-        //System.out.print("EnterToDate ");
-        //String ToDate = scanner.nextLine();
-
         String file = "testfile.csv";
-        String FromDate = "12/24/2018";
-        String ToDate = "12/24/2018";
+        System.setProperty("javax.xml.soap.SAAJMetaFactory", "com.sun.xml.messaging.saaj.soap.SAAJMetaFactoryImpl");
+
+        String FromDate = "12/25/2018";
+        String ToDate = "12/25/2018";
 
 
-        makeCSVFile("wsdl.8e3c2231-b203-6aa4-4a14-4978e87ebfcd.VbkulkllJdbLjlbb", FromDate, ToDate);
+        //calls loginAPI call and returns new session id
+        String sessionID = makeLoginAPICall();
 
-        //SOAPMessage readshifts = createReadShifts("wsdl.fd071a44-ce91-2099-4a14-807784d388ce.pecdjadicjpMOjlj", FromDate, ToDate);
-        ///SOAPMessage readShiftResponse = callSoapWebService(readshifts);
+        //saves shifts from the given file
+        makeSaveShiftsCall(file,sessionID);
 
-       // makeCSVFile("wsdl.fd071a44-ce91-2099-4a14-807784d388ce.pecdjadicjpMOjlj", FromDate,ToDate);
-        //SOAPMessage requestRead = createReadShifts(sessionID,FromDate,ToDate);
-        //callSoapWebService(requestRead);
+        //reads shifts for the given date and creates a CSV file with output
+        makeCSVFile(sessionID, FromDate, ToDate);
 
-        //SOAPMessage requestSaveShift = createSaveShifts(file, sessionID);
-        //callSoapWebService(requestSaveShift);
-        //callSoapWebService(makeSaveShiftsCall();)
-
-
-        // makeReadShiftsCall(sessionID, FromDate, ToDate); // returns a csv file with all shifts for the given dates
-        //makeSaveShiftsCall(file, sessionID); //sends shifts for the given CSV file to the server
 
 
     }
@@ -135,6 +105,15 @@ public class CreateSOAPMessage {
         return null;
     }
 
+
+    public static void makeSaveShiftsCall(String file, String sessionID){
+        System.out.println();
+        System.out.println("Making SaveShift call");
+        System.out.println();
+        SOAPMessage saveShiftRequest = createSaveShifts(file, sessionID);
+        SOAPMessage saveShiftResponse = callSoapWebService(saveShiftRequest);
+
+    }
     //creates SaveShifts request
     public static SOAPMessage createSaveShifts(String file, String pcSessionID) {
 
@@ -208,6 +187,9 @@ public class CreateSOAPMessage {
         return null;
 
     }
+
+
+
 
     //creates Shifts for soap requests
     public static SOAPElement makettShifts(SOAPElement element, String shiftDate, String timeStart, String timeEnd, String shiftType) {
@@ -520,7 +502,11 @@ public class CreateSOAPMessage {
 
             System.out.println();
 
+            System.out.println();
+
             System.out.println("Response SOAP Message:");
+            System.out.println();
+
 
             soapResponse.writeTo(System.out);
             System.out.println();
@@ -540,6 +526,8 @@ public class CreateSOAPMessage {
 
     //login to server to get new sessionID
     public static String makeLoginAPICall() throws ParserConfigurationException, IOException, SOAPException, SAXException, XPathExpressionException {
+        System.out.println();
+        System.out.println("Making Login API Call");
         SOAPMessage loginRequest = createLoginRequest();
         SOAPMessage loginResponse = callSoapWebService(loginRequest);
         String sessionID = "";
@@ -589,7 +577,7 @@ public class CreateSOAPMessage {
                 CSVWriter.DEFAULT_LINE_END);
 
 
-
+        System.out.println("Making API call to read shifts for: "+FromDate+"-"+ToDate);
         SOAPMessage readshifts = createReadShifts(sessionID, FromDate, ToDate);
         SOAPMessage readShiftResponse = callSoapWebService(readshifts);
 
@@ -619,6 +607,7 @@ public class CreateSOAPMessage {
 
                             Node childNode = (Node) shiftsInfo.item(j);
                             row1[k] = childNode.getNodeName();
+                            row[k] = childNode.getTextContent();
                             k++;
                         }
 
@@ -628,19 +617,7 @@ public class CreateSOAPMessage {
                         data.add(row1);
                      }
 
-                    for (int k = 0; k < row.length;) {
-                        for (int j = 0; j < shiftsInfo.getLength(); j++) {
-
-                            Node childNode = (Node) shiftsInfo.item(j);
-                            row[k] = childNode.getTextContent();
-                            k++;
-                            //System.out.println(childNode.getTextContent());
-                        }
-                    }
-
-
-                    data.add(row);
-
+                     data.add(row);
 
                 }
 
