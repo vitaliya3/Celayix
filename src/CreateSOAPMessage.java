@@ -1,23 +1,33 @@
+import com.opencsv.CSVWriter;
+
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import javax.xml.soap.Node;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.*;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMResult;
 import javax.xml.xpath.*;
-import java.io.IOException;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
-
 public class CreateSOAPMessage {
-    public static void main(String[] args) throws IOException, SOAPException, ParserConfigurationException, SAXException, XPathExpressionException {
+    public static void main(String[] args) throws Exception {
 
 
         System.setProperty("javax.xml.soap.SAAJMetaFactory", "com.sun.xml.messaging.saaj.soap.SAAJMetaFactoryImpl");
         //calls loginAPI call and returns new session id
-        String sessionID = makeLoginAPICall();
-        System.out.println("sessionid is "+sessionID);
+       // String sessionID = makeLoginAPICall();
+        //System.out.println("sessionid is " + sessionID);
 
         //Scanner scanner = new Scanner(System.in);
         //System.out.print("Enter a file name: ");
@@ -30,19 +40,25 @@ public class CreateSOAPMessage {
         //String ToDate = scanner.nextLine();
 
         String file = "testfile.csv";
-        String FromDate = "12/20/2018";
-        String ToDate = "12/20/2018";
+        String FromDate = "12/24/2018";
+        String ToDate = "12/24/2018";
 
+
+        makeCSVFile("wsdl.8e3c2231-b203-6aa4-4a14-4978e87ebfcd.VbkulkllJdbLjlbb", FromDate, ToDate);
+
+        //SOAPMessage readshifts = createReadShifts("wsdl.fd071a44-ce91-2099-4a14-807784d388ce.pecdjadicjpMOjlj", FromDate, ToDate);
+        ///SOAPMessage readShiftResponse = callSoapWebService(readshifts);
+
+       // makeCSVFile("wsdl.fd071a44-ce91-2099-4a14-807784d388ce.pecdjadicjpMOjlj", FromDate,ToDate);
         //SOAPMessage requestRead = createReadShifts(sessionID,FromDate,ToDate);
-       // callSoapWebService(requestRead);
+        //callSoapWebService(requestRead);
 
-        SOAPMessage requestSaveShift = createSaveShifts(file, sessionID);
-        callSoapWebService(requestSaveShift);
+        //SOAPMessage requestSaveShift = createSaveShifts(file, sessionID);
+        //callSoapWebService(requestSaveShift);
         //callSoapWebService(makeSaveShiftsCall();)
 
 
-
-       // makeReadShiftsCall(sessionID, FromDate, ToDate); // returns a csv file with all shifts for the given dates
+        // makeReadShiftsCall(sessionID, FromDate, ToDate); // returns a csv file with all shifts for the given dates
         //makeSaveShiftsCall(file, sessionID); //sends shifts for the given CSV file to the server
 
 
@@ -144,7 +160,7 @@ public class CreateSOAPMessage {
                 makettShifts(dsShifts, b.getStartDate(), b.getStartTime(), b.getEndTime(), b.getArea());
             }
 
-           soapMsg.writeTo(System.out);
+            soapMsg.writeTo(System.out);
             //System.out.println();
             return soapMsg;
 
@@ -490,7 +506,7 @@ public class CreateSOAPMessage {
 
 //sends Soap Message to the server and returns response
 
-    private static SOAPMessage callSoapWebService(SOAPMessage request) {
+    public static SOAPMessage callSoapWebService(SOAPMessage request) {
         try {
             String soapEndpointUrl = "http://cws-airatech.celayix.com/wsa/wsa1";
             // Create SOAP Connection
@@ -523,63 +539,128 @@ public class CreateSOAPMessage {
 
 
     //login to server to get new sessionID
-    public static String makeLoginAPICall()  throws ParserConfigurationException, IOException, SOAPException, SAXException, XPathExpressionException {
+    public static String makeLoginAPICall() throws ParserConfigurationException, IOException, SOAPException, SAXException, XPathExpressionException {
         SOAPMessage loginRequest = createLoginRequest();
         SOAPMessage loginResponse = callSoapWebService(loginRequest);
-        String sessionID="";
+        String sessionID = "";
 
         SOAPBody body = loginResponse.getSOAPBody();
 
-            NodeList nl= body.getElementsByTagName("apSrvResponse");
+        NodeList nl = body.getElementsByTagName("apSrvResponse");
 
 
-            if (nl != null) {
-                int length = nl.getLength();
-                for (int i = 0; i < length; i++) {
-                    if (nl.item(i).getNodeType() == Node.ELEMENT_NODE) {
-                        Element el = (Element) nl.item(i);
-                        if (el.getNodeName().contains("apSrvResponse")) {
-                            String contextValue = el.getElementsByTagName("contextValue").item((1)).getTextContent();
-                            sessionID=contextValue;
-                            //System.out.println();
-                           // System.out.println(("sessionid from method "+contextValue));
-
-                        }
+        if (nl != null) {
+            int length = nl.getLength();
+            for (int i = 0; i < length; i++) {
+                if (nl.item(i).getNodeType() == Node.ELEMENT_NODE) {
+                    Element el = (Element) nl.item(i);
+                    if (el.getNodeName().contains("apSrvResponse")) {
+                        String contextValue = el.getElementsByTagName("contextValue").item((1)).getTextContent();
+                        sessionID = contextValue;
+                        //System.out.println();
+                        // System.out.println(("sessionid from method "+contextValue));
 
                     }
 
                 }
 
-
             }
 
-            return sessionID;
 
         }
 
-
-    //this call will readShifts and produce a CSV file with data
-   // public void SOAPMessage makeReadShiftsCall(String sessionID, String FromDate, String ToDate) {
-
-    //    SOAPMessage readShiftRequest = createReadShifts(sessionID, FromDate, ToDate);
-     //   SOAPMessage readShiftsResponse = callSoapWebService(readShiftRequest);
-
-        //return readShiftsResponse;//TODO save response as a CSV file
-
-
-  //  }
-
-    // Saves shifts
-    //public static void makeSaveShiftsCall(String file, String sessionID) {
-        //SOAPMessage saveShiftsRequest = createSaveShifts(file, sessionID);
-       // callSoapWebService(saveShiftsRequest);
-
-
-    //}
-
-
+        return sessionID;
 
     }
+
+
+//makes readShifts call and creates a CSV file
+    public static void makeCSVFile(String sessionID, String FromDate, String ToDate) throws ParserConfigurationException, IOException, SOAPException, SAXException, XPathExpressionException {
+        //File file = new File("/Users/Vita/SOAPMessages/test.csv");
+
+        FileWriter outputfile = new FileWriter("/Users/Vita/SOAPMessages/test.csv");
+        List<String[]> data = new ArrayList<String[]>();
+
+        // create CSVWriter object filewriter object as parameter
+        //CSVWriter writer = new CSVWriter(outputfile);
+        CSVWriter writer = new CSVWriter(outputfile, ',',
+                CSVWriter.NO_QUOTE_CHARACTER,
+                CSVWriter.DEFAULT_ESCAPE_CHARACTER,
+                CSVWriter.DEFAULT_LINE_END);
+
+
+
+        SOAPMessage readshifts = createReadShifts(sessionID, FromDate, ToDate);
+        SOAPMessage readShiftResponse = callSoapWebService(readshifts);
+
+
+        SOAPBody body = readShiftResponse.getSOAPBody();
+
+        NodeList nl = body.getElementsByTagName("ttShifts");
+
+        if (nl != null) {
+
+            int length = nl.getLength();
+            for (int i = 0; i < length; i++) {
+                if (nl.item(i).getNodeType() == Node.ELEMENT_NODE) {
+
+                    Element el = (Element) nl.item(i);
+
+                     //data.add(nw String[]{shiftId, cid, bid});
+
+                    NodeList shiftsInfo = el.getChildNodes();
+
+                    String[] row1 = new String[shiftsInfo.getLength()];
+                    String[] row = new String[shiftsInfo.getLength()];
+
+                    for (int k = 0; k < row1.length;) {
+
+                        for (int j = 0; j < shiftsInfo.getLength(); j++) {
+
+                            Node childNode = (Node) shiftsInfo.item(j);
+                            row1[k] = childNode.getNodeName();
+                            k++;
+                        }
+
+                    }
+
+                     if(i==0) {
+                        data.add(row1);
+                     }
+
+                    for (int k = 0; k < row.length;) {
+                        for (int j = 0; j < shiftsInfo.getLength(); j++) {
+
+                            Node childNode = (Node) shiftsInfo.item(j);
+                            row[k] = childNode.getTextContent();
+                            k++;
+                            //System.out.println(childNode.getTextContent());
+                        }
+                    }
+
+
+                    data.add(row);
+
+
+                }
+
+
+            }
+            writer.writeAll(data);
+            writer.close();
+
+
+        }
+
+    }
+
+
+}
+
+
+
+
+
 
 
 
