@@ -17,19 +17,21 @@ public class CreateSOAPMessage {
         String file = "testfile.csv";
         System.setProperty("javax.xml.soap.SAAJMetaFactory", "com.sun.xml.messaging.saaj.soap.SAAJMetaFactoryImpl");
 
-        String FromDate = "12/25/2018";
-        String ToDate = "12/25/2018";
+        String FromDate = "12/26/2018";
+        String ToDate = "12/26/2018";
 
 
         //calls loginAPI call and returns new session id
         String sessionID = makeLoginAPICall();
 
         //saves shifts from the given file
-        makeSaveShiftsCall(file,sessionID);
+        //makeSaveShiftsCall(file,sessionID);
 
         //reads shifts for the given date and creates a CSV file with output
-        makeCSVFile(sessionID, FromDate, ToDate);
+       // makeCSVFile(sessionID, FromDate, ToDate);
 
+
+       makeAddEmployeeCall(sessionID, "Vita", "leonova", "@aira.io");
 
 
     }
@@ -74,7 +76,7 @@ public class CreateSOAPMessage {
         }
         return null;
     }
-
+//creates readShifts request
     public static SOAPMessage createReadShifts(String sessionID, String FromDate, String ToDate) {
 
         try {
@@ -106,14 +108,8 @@ public class CreateSOAPMessage {
     }
 
 
-    public static void makeSaveShiftsCall(String file, String sessionID){
-        System.out.println();
-        System.out.println("Making SaveShift call");
-        System.out.println();
-        SOAPMessage saveShiftRequest = createSaveShifts(file, sessionID);
-        SOAPMessage saveShiftResponse = callSoapWebService(saveShiftRequest);
 
-    }
+
     //creates SaveShifts request
     public static SOAPMessage createSaveShifts(String file, String pcSessionID) {
 
@@ -122,18 +118,11 @@ public class CreateSOAPMessage {
 
             SOAPMessage soapMsg = createSoapMessage();
 
-            SOAPElement shifts2 = soapMsg.getSOAPBody().addChildElement("s0:apSrvShiftSave");
+            SOAPElement s02 = soapMsg.getSOAPBody().addChildElement("s0:apSrvShiftSave");
 
-            SOAPElement dsContext = shifts2.addChildElement("dsContext");
+            addDsContext(s02, pcSessionID);
 
-
-            makeTtContext(dsContext, "pcAction", "ADD_UPDATE");
-            makeTtContext(dsContext, "pcSessionID", pcSessionID);
-            makeTtContext(dsContext, "pcUserID", "wsdl");
-            makeTtContext(dsContext, "piBranchID", "2");
-            makeTtContext(dsContext, "piCompanyID", "2");
-
-            SOAPElement dsShifts = shifts2.addChildElement("dsShifts");
+            SOAPElement dsShifts = s02.addChildElement("dsShifts");
 
             for (Shift b : shiftList) {
                 makettShifts(dsShifts, b.getStartDate(), b.getStartTime(), b.getEndTime(), b.getArea());
@@ -148,6 +137,51 @@ public class CreateSOAPMessage {
             e.printStackTrace();
         }
         return null;
+    }
+
+
+    //creates addEmployee request
+    public static SOAPMessage createAddEmployee(String pcSessionID, String firstName, String lastName, String email){
+
+        try {
+
+            SOAPMessage soapMsg = createSoapMessage();
+
+            SOAPElement s02 = soapMsg.getSOAPBody().addChildElement("s0:apSrvEmpSave");
+
+            addDsContext(s02, pcSessionID);
+
+
+            SOAPElement dsEmployee = s02.addChildElement("dsEmployee");
+
+            makettEmployee(dsEmployee,firstName,lastName,email);
+
+
+            soapMsg.writeTo(System.out);
+            //System.out.println();
+            return soapMsg;
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+
+
+    public static void addDsContext(SOAPElement apiCall, String pcSessionID ) throws SOAPException {
+
+        SOAPElement dsContext = apiCall.addChildElement("dsContext");
+
+
+        makeTtContext(dsContext, "pcAction", "ADD_UPDATE");
+        makeTtContext(dsContext, "pcSessionID", pcSessionID);
+        makeTtContext(dsContext, "pcUserID", "wsdl");
+        makeTtContext(dsContext, "piBranchID", "2");
+        makeTtContext(dsContext, "piCompanyID", "2");
+
     }
 
 
@@ -190,6 +224,332 @@ public class CreateSOAPMessage {
 
 
 
+
+    public static  SOAPElement makettEmployee(SOAPElement element, String firstName, String lastName, String email) throws SOAPException {
+
+        QName childname = new QName("ttEmployee");
+        SOAPElement ttEmployee = element.addChildElement(childname);
+
+
+        SOAPElement cid = ttEmployee.addChildElement("cid");
+        cid.addTextNode("2");
+
+        SOAPElement bid = ttEmployee.addChildElement("bid");
+        bid.addTextNode("2");
+
+        SOAPElement eid = ttEmployee.addChildElement("eid");
+        eid.addTextNode("0");
+
+        SOAPElement emnamel = ttEmployee.addChildElement("emnamel");
+        emnamel.addTextNode(lastName);
+
+        SOAPElement emnamef = ttEmployee.addChildElement("emnamef");
+        emnamef.addTextNode(firstName);
+
+        SOAPElement emshort = ttEmployee.addChildElement("emshort");
+        emshort.addTextNode("");
+
+        SOAPElement rstat = ttEmployee.addChildElement("rstat");
+        rstat.addTextNode("");
+
+        SOAPElement addr = ttEmployee.addChildElement("addr");
+        addr.addTextNode("");
+
+        SOAPElement addr2 = ttEmployee.addChildElement("addr");
+        addr2.addTextNode("");
+
+        SOAPElement addr3 = ttEmployee.addChildElement("addr");
+        addr3.addTextNode("");
+
+        SOAPElement city = ttEmployee.addChildElement("city");
+        city.addTextNode("");
+
+        SOAPElement stcd = ttEmployee.addChildElement("stcd");
+        stcd.addTextNode("");
+
+        SOAPElement zip = ttEmployee.addChildElement("zip");
+        zip.addTextNode("");
+
+        SOAPElement cycd = ttEmployee.addChildElement("cycd");
+        cycd.addTextNode("");
+
+        SOAPElement phone = ttEmployee.addChildElement("phone");
+        phone.addTextNode("");
+
+        SOAPElement phone2 = ttEmployee.addChildElement("phone");
+        phone2.addTextNode("");
+
+        SOAPElement faxno = ttEmployee.addChildElement("faxno");
+        faxno.addTextNode("");
+
+        SOAPElement teltype = ttEmployee.addChildElement("teltype");
+        teltype.addTextNode("");
+
+        SOAPElement emailid = ttEmployee.addChildElement("emailid");
+        emailid.addTextNode(email);
+
+
+        SOAPElement ssn = ttEmployee.addChildElement("ssn");
+        ssn.addTextNode("");
+
+        SOAPElement dob = ttEmployee.addChildElement("dob");
+        dob.addTextNode("");
+
+        SOAPElement emsex = ttEmployee.addChildElement("emsex");
+        emsex.addTextNode("");
+
+        SOAPElement embackgr = ttEmployee.addChildElement("embackgr");
+        embackgr.addTextNode("");
+
+        SOAPElement emhaircol = ttEmployee.addChildElement("emhaircol");
+        emhaircol.addTextNode("");
+
+        SOAPElement emeyecol = ttEmployee.addChildElement("emeyecol");
+        emeyecol.addTextNode("");
+
+        SOAPElement emhgt = ttEmployee.addChildElement("emhgt");
+        emhgt.addTextNode("");
+
+        SOAPElement emwgt = ttEmployee.addChildElement("emwgt");
+        emwgt.addTextNode("");
+
+        SOAPElement emmrstcd = ttEmployee.addChildElement("emmrstcd");
+        emmrstcd.addTextNode("");
+
+        SOAPElement emdepend = ttEmployee.addChildElement("emdepend");
+        emdepend.addTextNode("");
+
+        SOAPElement ekin = ttEmployee.addChildElement("ekin");
+        ekin.addTextNode("");
+
+
+        SOAPElement photoloc = ttEmployee.addChildElement("photoloc");
+        photoloc.addTextNode("");
+
+        SOAPElement dtstart = ttEmployee.addChildElement("dtstart");
+        dtstart.addTextNode("");
+
+        SOAPElement dtend= ttEmployee.addChildElement("dtend");
+        dtend.addTextNode("");
+
+        SOAPElement termrc= ttEmployee.addChildElement("termrc");
+        termrc.addTextNode("");
+
+
+        SOAPElement emnerev = ttEmployee.addChildElement("emnerev");
+        emnerev.addTextNode("");
+
+
+        SOAPElement emlarev = ttEmployee.addChildElement("emlarev");
+        emlarev.addTextNode("");
+
+        SOAPElement emuic = ttEmployee.addChildElement("emuic");
+        emuic.addTextNode("false");
+
+        SOAPElement emuicfil = ttEmployee.addChildElement("emuicfil");
+        emuicfil.addNamespaceDeclaration("nil", "true");
+
+        SOAPElement emuicexp = ttEmployee.addChildElement("emuicexp");
+        emuicexp.addNamespaceDeclaration("nil", "true");
+
+        SOAPElement depcd = ttEmployee.addChildElement("depcd");
+        depcd.addTextNode("DPT1");
+
+        SOAPElement emposcd = ttEmployee.addChildElement("emposcd");
+        emposcd.addTextNode("POS1");
+
+        SOAPElement empycd = ttEmployee.addChildElement("empycd");
+        empycd.addTextNode("HEFT");
+
+        SOAPElement emsrtycd = ttEmployee.addChildElement("emsrtycd");
+        emsrtycd.addTextNode("POS");
+
+        SOAPElement pyfrcd = ttEmployee.addChildElement("pyfrcd");
+        pyfrcd.addTextNode("B");
+
+        SOAPElement embudget = ttEmployee.addChildElement("embudget");
+        embudget.addTextNode("true");
+
+        SOAPElement embdby = ttEmployee.addChildElement("embdby");
+        embdby.addTextNode("W");
+
+        SOAPElement embdhrs = ttEmployee.addChildElement("embdhrs");
+        embdhrs.addTextNode("40.0");
+
+        SOAPElement statpay = ttEmployee.addChildElement("statpay");
+        statpay.addTextNode("true");
+
+        SOAPElement brkexm = ttEmployee.addChildElement("brkexm");
+        brkexm.addTextNode("true");
+
+        SOAPElement ratecalc = ttEmployee.addChildElement("ratecalc");
+        ratecalc.addTextNode("F");
+
+        SOAPElement eunion = ttEmployee.addChildElement("eunion");
+        eunion.addTextNode("false");
+
+        SOAPElement empsrhrs = ttEmployee.addChildElement("empsrhrs");
+        empsrhrs.addTextNode("0.0");
+
+        SOAPElement emfedid = ttEmployee.addChildElement("emfedid");
+        emfedid.addTextNode("");
+
+        SOAPElement fedidexp = ttEmployee.addChildElement("fedidexp");
+        fedidexp.addNamespaceDeclaration("nil", "true");
+
+        SOAPElement wauth = ttEmployee.addChildElement("wauth");
+        wauth.addTextNode("");
+
+        SOAPElement wauthexp = ttEmployee.addChildElement("wauthexp");
+        wauthexp.addNamespaceDeclaration("nil", "true");
+
+        SOAPElement gunper = ttEmployee.addChildElement("gunper");
+        gunper.addTextNode("");
+
+        SOAPElement gunexp = ttEmployee.addChildElement("gunexp");
+        gunexp.addNamespaceDeclaration("nil", "true");
+
+
+        SOAPElement emstateid = ttEmployee.addChildElement("emstateid");
+        emstateid.addTextNode("");
+
+        SOAPElement stateexp = ttEmployee.addChildElement("stateexp");
+        stateexp.addNamespaceDeclaration("nil", "true");
+
+        SOAPElement embadge = ttEmployee.addChildElement("embadge");
+        embadge.addTextNode("");
+
+        SOAPElement badgeexp = ttEmployee.addChildElement("badgeexp");
+        badgeexp.addNamespaceDeclaration("nil", "true");
+
+        SOAPElement empother = ttEmployee.addChildElement("empother");
+        empother.addTextNode("");
+
+        SOAPElement otherexp = ttEmployee.addChildElement("otherexp");
+        otherexp.addNamespaceDeclaration("nil", "true");
+
+        SOAPElement emake = ttEmployee.addChildElement("emake");
+        emake.addTextNode("");
+
+        SOAPElement emodel= ttEmployee.addChildElement("emodel");
+        emodel.addTextNode("");
+
+        SOAPElement emcaryr= ttEmployee.addChildElement("emcaryr");
+        emcaryr.addTextNode("0");
+
+        SOAPElement emplate= ttEmployee.addChildElement("emplate");
+        emplate.addTextNode("");
+
+
+        SOAPElement carstcd= ttEmployee.addChildElement("carstcd");
+        carstcd.addTextNode("");
+
+        SOAPElement einsexp = ttEmployee.addChildElement("einsexp");
+        einsexp.addNamespaceDeclaration("nil", "true");
+
+        SOAPElement workdays= ttEmployee.addChildElement("workdays");
+        workdays.addTextNode("true");
+
+        SOAPElement workdays1= ttEmployee.addChildElement("workdays");
+        workdays1.addTextNode("true");
+
+        SOAPElement workdays2= ttEmployee.addChildElement("workdays");
+        workdays2.addTextNode("true");
+
+        SOAPElement workdays3= ttEmployee.addChildElement("workdays");
+        workdays3.addTextNode("true");
+
+        SOAPElement workdays4= ttEmployee.addChildElement("workdays");
+        workdays4.addTextNode("false");
+
+        SOAPElement workdays5= ttEmployee.addChildElement("workdays");
+        workdays5.addTextNode("false");
+
+        SOAPElement workdays6= ttEmployee.addChildElement("workdays");
+        workdays6.addTextNode("true");
+
+        SOAPElement ref1 = ttEmployee.addChildElement("ref1");
+        ref1.addTextNode("");
+
+        SOAPElement ref2 = ttEmployee.addChildElement("ref2");
+        ref2.addTextNode("");
+
+        SOAPElement ref3 = ttEmployee.addChildElement("ref3");
+        ref3.addTextNode("");
+
+        SOAPElement ref4 = ttEmployee.addChildElement("ref4");
+        ref4.addTextNode("");
+
+        SOAPElement ref5 = ttEmployee.addChildElement("ref5");
+        ref5.addTextNode("");
+
+        SOAPElement ref6 = ttEmployee.addChildElement("ref6");
+        ref6.addTextNode("");
+
+        SOAPElement ref7 = ttEmployee.addChildElement("ref7");
+        ref7.addTextNode("");
+
+        SOAPElement ref8 = ttEmployee.addChildElement("ref8");
+        ref8.addTextNode("");
+
+        SOAPElement ref9 = ttEmployee.addChildElement("ref9");
+        ref9.addTextNode("");
+
+        SOAPElement ref10 = ttEmployee.addChildElement("ref10");
+        ref10.addTextNode("");
+
+        SOAPElement cruser = ttEmployee.addChildElement("cruser");
+        cruser.addTextNode("");
+
+        SOAPElement crdate = ttEmployee.addChildElement("crdate");
+        crdate.addTextNode("");
+
+        SOAPElement crtime = ttEmployee.addChildElement("crtime");
+        crtime.addTextNode("");
+
+        SOAPElement exported = ttEmployee.addChildElement("exported");
+        exported.addTextNode("");
+
+        SOAPElement expdate = ttEmployee.addChildElement("expdate");
+        expdate.addNamespaceDeclaration("nil", "true");
+
+        SOAPElement archived = ttEmployee.addChildElement("archived");
+        archived.addTextNode("false");
+
+        SOAPElement archivedDate = ttEmployee.addChildElement("archivedDate");
+        archivedDate.addNamespaceDeclaration("nil", "true");
+
+        SOAPElement fullname = ttEmployee.addChildElement("fullname");
+        fullname.addTextNode("");
+
+        SOAPElement DbRow = ttEmployee.addChildElement("DbRow");
+        DbRow.addTextNode("0x000000");
+
+        SOAPElement disp_crtime = ttEmployee.addChildElement("disp_crtime");
+        disp_crtime.addTextNode("");
+
+        SOAPElement cObjectName = ttEmployee.addChildElement("cObjectName");
+        cObjectName.addTextNode("");
+
+        SOAPElement cValmess = ttEmployee.addChildElement("cValmess");
+        cValmess.addTextNode("");
+
+        SOAPElement cChkNew = ttEmployee.addChildElement("cChkNew");
+        cChkNew.addTextNode("A");
+
+        SOAPElement iImport = ttEmployee.addChildElement("iImport");
+        iImport.addTextNode("0");
+
+        SOAPElement lCalcolone = ttEmployee.addChildElement("lCalcolone");
+        lCalcolone.addTextNode("false");
+
+        SOAPElement disp_emnerev  = ttEmployee.addChildElement("disp_emnerev");
+        disp_emnerev.addTextNode("");
+
+        return ttEmployee;
+
+
+    }
 
     //creates Shifts for soap requests
     public static SOAPElement makettShifts(SOAPElement element, String shiftDate, String timeStart, String timeEnd, String shiftType) {
@@ -486,6 +846,9 @@ public class CreateSOAPMessage {
         return null;
     }
 
+
+
+
 //sends Soap Message to the server and returns response
 
     public static SOAPMessage callSoapWebService(SOAPMessage request) {
@@ -560,6 +923,18 @@ public class CreateSOAPMessage {
         return sessionID;
 
     }
+//makes saveshifts call
+    public static void makeSaveShiftsCall(String file, String sessionID){
+        System.out.println();
+        System.out.println("Making SaveShift call");
+        System.out.println();
+        SOAPMessage saveShiftRequest = createSaveShifts(file, sessionID);
+        callSoapWebService(saveShiftRequest);
+
+    }
+
+
+
 
 
 //makes readShifts call and creates a CSV file
@@ -629,6 +1004,17 @@ public class CreateSOAPMessage {
 
         }
 
+    }
+
+
+
+    //makes addEmployee call
+    public static void makeAddEmployeeCall(String sessionID, String firstName, String lastName, String email ){
+        System.out.println();
+        System.out.println("Making AddEmployee call");
+        System.out.println();
+        SOAPMessage addEmployeeRequest = createAddEmployee(sessionID, firstName,lastName,email);
+        callSoapWebService(addEmployeeRequest);
     }
 
 

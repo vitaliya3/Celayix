@@ -1,7 +1,5 @@
-import javax.lang.model.element.Name;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,9 +22,6 @@ public class CSVReader {
 
             String line = br.readLine(); // loop until all lines are read
 
-            //if(line!=null){
-//
-  //          }
 
             while((line=br.readLine())!= null){
 
@@ -35,7 +30,7 @@ public class CSVReader {
 
                 Shift shift = createShift(attributes);
 
-                shifts.add(shift); // read next line before looping // if end of file reached, line would be null
+                shifts.add(shift);
                 line = br.readLine();
 
             }
@@ -57,10 +52,7 @@ public class CSVReader {
         String Published = metadata[4];
         String StartTime = metadata[5];
         String Open = metadata[6];
-        // create and return book of this metadata
         Shift shift= new Shift(Area, Employee, EndTime, MealBreak, Published, StartTime, Open);
-        //return new Shift(Area, Employee, EndTime, MealBreak, Published, StartTime, Open);
-       // System.out.println(shift);
         return shift;
 
     }
@@ -145,8 +137,6 @@ class Shift {
     }
     public String getEndTime() {
         String[] time = endTime.split( "\\s+");
-        //System.out.println("endtime:"+time[1]);
-        //time[1].replace(":", "");
         time[1]=time[1].replace(":00", "0");
         return time[1];
     }
@@ -169,7 +159,6 @@ class Shift {
     public String getStartTime() {
         String[] time = startTime.split( "\\s+");
         time[1]=time[1].replace(":00", "0");
-        //System.out.println("starttime:"+time[1]);
 
         return time[1];
     }
@@ -181,8 +170,6 @@ class Shift {
 
     @Override
     public String toString() {
-        //return "Shift [Area=" + Area + ", Start=" + startTime + ", End=" + endTime + "]";
-
         return "Shift [Area=" + Area + ", Start=" + startTime + ", End=" + endTime + ",Open="+open+",Published="+published+ ",Employee="+Employee+",Meal="+mealbreak+"]";
 
     }
