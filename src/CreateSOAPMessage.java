@@ -13,12 +13,15 @@ import java.util.List;
 
 
 public class CreateSOAPMessage {
+
     public static void main(String[] args) throws Exception {
-        String file = "testfile.csv";
         System.setProperty("javax.xml.soap.SAAJMetaFactory", "com.sun.xml.messaging.saaj.soap.SAAJMetaFactoryImpl");
 
-        String FromDate = "12/26/2018";
-        String ToDate = "12/26/2018";
+
+        String file = "testfile.csv";
+
+        String FromDate = "12/24/2018";
+        String ToDate = "12/24/2018";
 
 
         //calls loginAPI call and returns new session id
@@ -28,11 +31,10 @@ public class CreateSOAPMessage {
         //makeSaveShiftsCall(file,sessionID);
 
         //reads shifts for the given date and creates a CSV file with output
-       // makeCSVFile(sessionID, FromDate, ToDate);
+        //makeCSVFile(sessionID, FromDate, ToDate);
+        // createReadShifts("wsdl.8cc9d87d-3b43-1fbf-4b14-4e1398e7e359.acdPljfllUavcVkd", FromDate,ToDate);
 
-
-       makeAddEmployeeCall(sessionID, "Vita", "leonova", "@aira.io");
-
+       makeAddEmployeeCall(sessionID, "test", "test", "vitaliya.leonova@aira.io", "A", "1234", "F","", "" );
 
     }
 
@@ -141,7 +143,7 @@ public class CreateSOAPMessage {
 
 
     //creates addEmployee request
-    public static SOAPMessage createAddEmployee(String pcSessionID, String firstName, String lastName, String email){
+    public static SOAPMessage createAddEmployee(String pcSessionID, String firstName, String lastName, String email, String status, String uid,String sex, String position, String type){
 
         try {
 
@@ -154,7 +156,7 @@ public class CreateSOAPMessage {
 
             SOAPElement dsEmployee = s02.addChildElement("dsEmployee");
 
-            makettEmployee(dsEmployee,firstName,lastName,email);
+            makettEmployee(dsEmployee,firstName,lastName,email,status,uid,sex, position, type);
 
 
             soapMsg.writeTo(System.out);
@@ -225,7 +227,11 @@ public class CreateSOAPMessage {
 
 
 
-    public static  SOAPElement makettEmployee(SOAPElement element, String firstName, String lastName, String email) throws SOAPException {
+    public static  SOAPElement makettEmployee(SOAPElement element, String firstName, String lastName, String email, String status, String uid, String sex, String position, String type)  throws SOAPException {
+
+        //String word = "Cow";
+        char letter = lastName.charAt(0);
+        String shortName = firstName+letter;
 
         QName childname = new QName("ttEmployee");
         SOAPElement ttEmployee = element.addChildElement(childname);
@@ -238,7 +244,7 @@ public class CreateSOAPMessage {
         bid.addTextNode("2");
 
         SOAPElement eid = ttEmployee.addChildElement("eid");
-        eid.addTextNode("0");
+        eid.addTextNode(uid);
 
         SOAPElement emnamel = ttEmployee.addChildElement("emnamel");
         emnamel.addTextNode(lastName);
@@ -247,10 +253,10 @@ public class CreateSOAPMessage {
         emnamef.addTextNode(firstName);
 
         SOAPElement emshort = ttEmployee.addChildElement("emshort");
-        emshort.addTextNode("");
+        emshort.addTextNode(shortName);
 
         SOAPElement rstat = ttEmployee.addChildElement("rstat");
-        rstat.addTextNode("");
+        rstat.addTextNode(status);
 
         SOAPElement addr = ttEmployee.addChildElement("addr");
         addr.addTextNode("");
@@ -296,7 +302,7 @@ public class CreateSOAPMessage {
         dob.addTextNode("");
 
         SOAPElement emsex = ttEmployee.addChildElement("emsex");
-        emsex.addTextNode("");
+        emsex.addTextNode(sex);
 
         SOAPElement embackgr = ttEmployee.addChildElement("embackgr");
         embackgr.addTextNode("");
@@ -314,10 +320,10 @@ public class CreateSOAPMessage {
         emwgt.addTextNode("");
 
         SOAPElement emmrstcd = ttEmployee.addChildElement("emmrstcd");
-        emmrstcd.addTextNode("");
+        emmrstcd.addTextNode("S");
 
         SOAPElement emdepend = ttEmployee.addChildElement("emdepend");
-        emdepend.addTextNode("");
+        emdepend.addTextNode("0");
 
         SOAPElement ekin = ttEmployee.addChildElement("ekin");
         ekin.addTextNode("");
@@ -327,7 +333,7 @@ public class CreateSOAPMessage {
         photoloc.addTextNode("");
 
         SOAPElement dtstart = ttEmployee.addChildElement("dtstart");
-        dtstart.addTextNode("");
+        dtstart.addTextNode("2018-01-01");
 
         SOAPElement dtend= ttEmployee.addChildElement("dtend");
         dtend.addTextNode("");
@@ -337,7 +343,7 @@ public class CreateSOAPMessage {
 
 
         SOAPElement emnerev = ttEmployee.addChildElement("emnerev");
-        emnerev.addTextNode("");
+        emnerev.addTextNode("101");
 
 
         SOAPElement emlarev = ttEmployee.addChildElement("emlarev");
@@ -353,28 +359,28 @@ public class CreateSOAPMessage {
         emuicexp.addNamespaceDeclaration("nil", "true");
 
         SOAPElement depcd = ttEmployee.addChildElement("depcd");
-        depcd.addTextNode("DPT1");
+        depcd.addTextNode("");
 
         SOAPElement emposcd = ttEmployee.addChildElement("emposcd");
-        emposcd.addTextNode("POS1");
+        emposcd.addTextNode(position);
 
         SOAPElement empycd = ttEmployee.addChildElement("empycd");
-        empycd.addTextNode("HEFT");
+        empycd.addTextNode(type);
 
         SOAPElement emsrtycd = ttEmployee.addChildElement("emsrtycd");
-        emsrtycd.addTextNode("POS");
+        emsrtycd.addTextNode("");
 
         SOAPElement pyfrcd = ttEmployee.addChildElement("pyfrcd");
-        pyfrcd.addTextNode("B");
+        pyfrcd.addTextNode("");
 
         SOAPElement embudget = ttEmployee.addChildElement("embudget");
-        embudget.addTextNode("true");
+        embudget.addTextNode("false");
 
         SOAPElement embdby = ttEmployee.addChildElement("embdby");
         embdby.addTextNode("W");
 
         SOAPElement embdhrs = ttEmployee.addChildElement("embdhrs");
-        embdhrs.addTextNode("40.0");
+        embdhrs.addTextNode("0.0");
 
         SOAPElement statpay = ttEmployee.addChildElement("statpay");
         statpay.addTextNode("true");
@@ -460,10 +466,10 @@ public class CreateSOAPMessage {
         workdays3.addTextNode("true");
 
         SOAPElement workdays4= ttEmployee.addChildElement("workdays");
-        workdays4.addTextNode("false");
+        workdays4.addTextNode("true");
 
         SOAPElement workdays5= ttEmployee.addChildElement("workdays");
-        workdays5.addTextNode("false");
+        workdays5.addTextNode("true");
 
         SOAPElement workdays6= ttEmployee.addChildElement("workdays");
         workdays6.addTextNode("true");
@@ -499,16 +505,16 @@ public class CreateSOAPMessage {
         ref10.addTextNode("");
 
         SOAPElement cruser = ttEmployee.addChildElement("cruser");
-        cruser.addTextNode("");
+        cruser.addTextNode("celayix");
 
         SOAPElement crdate = ttEmployee.addChildElement("crdate");
-        crdate.addTextNode("");
+        crdate.addTextNode("2019-01-07");
 
         SOAPElement crtime = ttEmployee.addChildElement("crtime");
-        crtime.addTextNode("");
+        crtime.addTextNode("0");
 
         SOAPElement exported = ttEmployee.addChildElement("exported");
-        exported.addTextNode("");
+        exported.addTextNode("false");
 
         SOAPElement expdate = ttEmployee.addChildElement("expdate");
         expdate.addNamespaceDeclaration("nil", "true");
@@ -535,7 +541,7 @@ public class CreateSOAPMessage {
         cValmess.addTextNode("");
 
         SOAPElement cChkNew = ttEmployee.addChildElement("cChkNew");
-        cChkNew.addTextNode("A");
+        cChkNew.addTextNode("");
 
         SOAPElement iImport = ttEmployee.addChildElement("iImport");
         iImport.addTextNode("0");
@@ -941,7 +947,7 @@ public class CreateSOAPMessage {
     public static void makeCSVFile(String sessionID, String FromDate, String ToDate) throws ParserConfigurationException, IOException, SOAPException, SAXException, XPathExpressionException {
         //File file = new File("/Users/Vita/SOAPMessages/test.csv");
 
-        FileWriter outputfile = new FileWriter("/Users/Vita/SOAPMessages/test.csv");
+        FileWriter outputfile = new FileWriter("/Users/Vita/SOAPMessages/test2.csv");
         List<String[]> data = new ArrayList<String[]>();
 
         // create CSVWriter object filewriter object as parameter
@@ -1006,18 +1012,42 @@ public class CreateSOAPMessage {
 
     }
 
-
-
-    //makes addEmployee call
-    public static void makeAddEmployeeCall(String sessionID, String firstName, String lastName, String email ){
+  //makes addEmployee call
+    public static void makeAddEmployeeCall(String sessionID, String firstName, String lastName, String email, String status, String uid, String sex, String position, String type) throws SOAPException {
         System.out.println();
         System.out.println("Making AddEmployee call");
         System.out.println();
-        SOAPMessage addEmployeeRequest = createAddEmployee(sessionID, firstName,lastName,email);
-        callSoapWebService(addEmployeeRequest);
+        SOAPMessage addEmployeeRequest = createAddEmployee(sessionID, firstName, lastName, email, status, uid, sex, position, type);
+        SOAPMessage response = callSoapWebService(addEmployeeRequest);
+
+        SOAPBody body = response.getSOAPBody();
+
+        NodeList nl = body.getElementsByTagName("ttEmployee");
+
+             if (nl != null) {
+
+            int length = nl.getLength();
+            for (int i = 0; i < length; i++) {
+                if (nl.item(i).getNodeType() == Node.ELEMENT_NODE) {
+
+                    Element el = (Element) nl.item(i);
+
+                    NodeList employeeInfo = el.getChildNodes();
+
+                   for (int j = 0; j < employeeInfo.getLength(); j++) {
+                        Node childNode = (Node) employeeInfo.item(j);
+                        if (childNode.getNodeName()=="cValmess" && childNode.getTextContent()!="") {
+
+                            System.out.println("ERROR:"+childNode.getTextContent());
+                        }
+
+                    }
+                }
+
+            }
+
+        }
     }
-
-
 }
 
 
